@@ -212,6 +212,7 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
                 !TextUtils.isEmpty(courseData.getCourse().getDiscussionUrl())) {
             items.add(new FragmentItemModel(CourseDiscussionTopicsFragment.class,
                     getResources().getString(R.string.discussion_title), FontAwesomeIcons.fa_comments_o,
+                    CourseDiscussionTopicsFragment.makeArguments(courseData),
                     new FragmentItemModel.FragmentStateListener() {
                         @Override
                         public void onFragmentSelected() {
@@ -239,6 +240,7 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
         items.add(new FragmentItemModel(ResourcesFragment.class,
                 getResources().getString(R.string.resources_title),
                 FontAwesomeIcons.fa_ellipsis_h,
+                ResourcesFragment.makeArguments(courseData),
                 new FragmentItemModel.FragmentStateListener() {
                     @Override
                     public void onFragmentSelected() {
