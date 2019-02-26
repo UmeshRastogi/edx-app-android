@@ -15,7 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.google.inject.Inject;
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
@@ -41,6 +40,7 @@ import java.util.List;
 import static android.widget.FrameLayout.LayoutParams;
 
 public class CourseTabsDashboardFragment extends TabsBaseFragment {
+    private static final String ARG_COURSE_NOT_FOUND = "ARG_COURSE_NOT_FOUND";
     protected final Logger logger = new Logger(getClass().getName());
 
     @Nullable
@@ -85,6 +85,7 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
                              Bundle savedInstanceState) {
         courseData = (EnrolledCoursesResponse) getArguments().getSerializable(Router.EXTRA_COURSE_DATA);
         if (courseData != null) {
+            // The case where we have valid course data
             getActivity().setTitle(courseData.getCourse().getName());
             setHasOptionsMenu(courseData.getCourse().getCoursewareAccess().hasAccess());
             environment.getAnalyticsRegistry().trackScreenView(
@@ -99,7 +100,13 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
             } else {
                 return super.onCreateView(inflater, container, savedInstanceState);
             }
+        } else if (getArguments().getBoolean(ARG_COURSE_NOT_FOUND)) {
+            // The case where we have invalid course data
+            errorLayoutBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_dashboard_error_layout, container, false);
+            errorLayoutBinding.errorMsg.setText(R.string.cannot_show_dashboard);
+            return errorLayoutBinding.getRoot();
         } else {
+            // The case where we need to fetch course's data based on its courseId
             fetchCourseById();
             getActivity().setTitle("");
             final FrameLayout frameLayout = new FrameLayout(getActivity());
@@ -114,7 +121,7 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
         courseApi.getEnrolledCourses().enqueue(new CourseAPI.GetCourseByIdCallback(getActivity(), courseId) {
             @Override
             protected void onResponse(@NonNull final EnrolledCoursesResponse course) {
-                if (getActivity() != null && getActivity().getIntent() != null) {
+                if (getActivity() != null) {
                     final Bundle args = new Bundle();
                     args.putSerializable(Router.EXTRA_COURSE_DATA, course);
                     setArguments(args);
@@ -126,7 +133,15 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
 
             @Override
             protected void onFailure(@NonNull final Throwable error) {
-                Toast.makeText(getActivity(), R.string.cannot_show_dashboard, Toast.LENGTH_SHORT).show();
+                if (getActivity() != null) {
+                    final Bundle args = new Bundle();
+                    args.putBoolean(ARG_COURSE_NOT_FOUND, true);
+                    setArguments(args);
+                    getFragmentManager().beginTransaction()
+                            .detach(CourseTabsDashboardFragment.this)
+                            .attach(CourseTabsDashboardFragment.this).commit();
+                    logger.error(new Exception("Invalid Course ID provided via deeplink: " + courseId), true);
+                }
             }
         });
     }
