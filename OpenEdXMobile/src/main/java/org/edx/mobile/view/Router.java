@@ -126,8 +126,8 @@ public class Router {
     }
 
     public void showCourseDashboardTabs(Activity activity, EnrolledCoursesResponse model,
-                                        boolean announcements) {
-        activity.startActivity(CourseTabsDashboardActivity.newIntent(activity, model, announcements));
+                                        String courseId, boolean announcements) {
+        activity.startActivity(CourseTabsDashboardActivity.newIntent(activity, model, courseId, announcements));
     }
 
     /**

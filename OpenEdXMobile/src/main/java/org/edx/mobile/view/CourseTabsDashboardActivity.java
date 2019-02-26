@@ -15,9 +15,10 @@ import static org.edx.mobile.view.Router.EXTRA_COURSE_ID;
 public class CourseTabsDashboardActivity extends OfflineSupportBaseActivity {
     public static Intent newIntent(@NonNull Activity activity,
                                    @NonNull EnrolledCoursesResponse courseData,
-                                   boolean announcements) {
+                                   String courseId, boolean announcements) {
         Intent intent = new Intent(activity, CourseTabsDashboardActivity.class);
         intent.putExtra(EXTRA_COURSE_DATA, courseData);
+        intent.putExtra(EXTRA_COURSE_ID, courseId);
         intent.putExtra(EXTRA_ANNOUNCEMENTS, announcements);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         return intent;

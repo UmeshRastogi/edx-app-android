@@ -362,7 +362,7 @@ public class CourseDetailFragment extends BaseFragment {
                                     @Override
                                     protected void onResponse(@NonNull EnrolledCoursesResponse course) {
                                         environment.getRouter().showMainDashboard(getActivity());
-                                        environment.getRouter().showCourseDashboardTabs(getActivity(), course, false);
+                                        environment.getRouter().showCourseDashboardTabs(getActivity(), course, null, false);
                                     }
                                 });
                             }
@@ -386,7 +386,7 @@ public class CourseDetailFragment extends BaseFragment {
             for (EnrolledCoursesResponse course : enrolledCoursesResponse) {
                 if (course.getCourse().getId().equals(courseDetail.course_id)) {
                     environment.getRouter().showMainDashboard(getActivity());
-                    environment.getRouter().showCourseDashboardTabs(getActivity(), course, false);
+                    environment.getRouter().showCourseDashboardTabs(getActivity(), course, null, false);
                 }
             }
         } catch (Exception exception) {
