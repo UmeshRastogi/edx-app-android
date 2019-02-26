@@ -10,6 +10,7 @@ import org.edx.mobile.model.api.EnrolledCoursesResponse;
 
 import static org.edx.mobile.view.Router.EXTRA_ANNOUNCEMENTS;
 import static org.edx.mobile.view.Router.EXTRA_COURSE_DATA;
+import static org.edx.mobile.view.Router.EXTRA_COURSE_ID;
 
 public class CourseTabsDashboardActivity extends OfflineSupportBaseActivity {
     public static Intent newIntent(@NonNull Activity activity,
@@ -25,7 +26,8 @@ public class CourseTabsDashboardActivity extends OfflineSupportBaseActivity {
     @Override
     public Fragment getFirstFragment() {
         return CourseTabsDashboardFragment.newInstance(
-                (EnrolledCoursesResponse) getIntent().getExtras().getSerializable(EXTRA_COURSE_DATA));
+                (EnrolledCoursesResponse) getIntent().getExtras().getSerializable(EXTRA_COURSE_DATA),
+                getIntent().getStringExtra(EXTRA_COURSE_ID));
     }
 
     @Override

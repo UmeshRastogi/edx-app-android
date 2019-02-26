@@ -14,11 +14,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.google.inject.Inject;
 import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 
 import org.edx.mobile.R;
+import org.edx.mobile.course.CourseAPI;
 import org.edx.mobile.databinding.FragmentDashboardErrorLayoutBinding;
 import org.edx.mobile.logger.Logger;
 import org.edx.mobile.model.FragmentItemModel;
@@ -35,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static android.widget.FrameLayout.LayoutParams;
+
 public class CourseTabsDashboardFragment extends TabsBaseFragment {
     protected final Logger logger = new Logger(getClass().getName());
 
@@ -46,28 +51,22 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
     @Inject
     private AnalyticsRegistry analyticsRegistry;
 
+    @Inject
+    private CourseAPI courseApi;
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable updateDownloadProgressRunnable;
     private MenuItem downloadsMenuItem;
     private boolean wasDownloadItemVisibleBeforeStopping = false;
 
     @NonNull
-    public static CourseTabsDashboardFragment newInstance(EnrolledCoursesResponse courseData) {
+    public static CourseTabsDashboardFragment newInstance(EnrolledCoursesResponse courseData, String courseId) {
         final CourseTabsDashboardFragment fragment = new CourseTabsDashboardFragment();
         final Bundle bundle = new Bundle();
         bundle.putSerializable(Router.EXTRA_COURSE_DATA, courseData);
+        bundle.putSerializable(Router.EXTRA_COURSE_ID, courseId);
         fragment.setArguments(bundle);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        courseData = (EnrolledCoursesResponse) getArguments().getSerializable(Router.EXTRA_COURSE_DATA);
-        getActivity().setTitle(courseData.getCourse().getName());
-        setHasOptionsMenu(courseData.getCourse().getCoursewareAccess().hasAccess());
-        environment.getAnalyticsRegistry().trackScreenView(
-                Analytics.Screens.COURSE_DASHBOARD, courseData.getCourse().getId(), null);
     }
 
     @Override
@@ -84,17 +83,52 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        courseData = (EnrolledCoursesResponse) getArguments().getSerializable(Router.EXTRA_COURSE_DATA);
+        if (courseData != null) {
+            getActivity().setTitle(courseData.getCourse().getName());
+            setHasOptionsMenu(courseData.getCourse().getCoursewareAccess().hasAccess());
+            environment.getAnalyticsRegistry().trackScreenView(
+                    Analytics.Screens.COURSE_DASHBOARD, courseData.getCourse().getId(), null);
 
-        if (!courseData.getCourse().getCoursewareAccess().hasAccess()) {
-            final boolean auditAccessExpired = courseData.getAuditAccessExpires() != null &&
-                    new Date().after(DateUtil.convertToDate(courseData.getAuditAccessExpires()));
-
-            errorLayoutBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_dashboard_error_layout, container, false);
-            errorLayoutBinding.errorMsg.setText(auditAccessExpired ? R.string.course_access_expired : R.string.course_not_started);
-            return errorLayoutBinding.getRoot();
+            if (!courseData.getCourse().getCoursewareAccess().hasAccess()) {
+                final boolean auditAccessExpired = courseData.getAuditAccessExpires() != null &&
+                        new Date().after(DateUtil.convertToDate(courseData.getAuditAccessExpires()));
+                errorLayoutBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_dashboard_error_layout, container, false);
+                errorLayoutBinding.errorMsg.setText(auditAccessExpired ? R.string.course_access_expired : R.string.course_not_started);
+                return errorLayoutBinding.getRoot();
+            } else {
+                return super.onCreateView(inflater, container, savedInstanceState);
+            }
         } else {
-            return super.onCreateView(inflater, container, savedInstanceState);
+            fetchCourseById();
+            getActivity().setTitle("");
+            final FrameLayout frameLayout = new FrameLayout(getActivity());
+            frameLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            frameLayout.addView(inflater.inflate(R.layout.loading_indicator, container, false));
+            return frameLayout;
         }
+    }
+
+    private void fetchCourseById() {
+        final String courseId = getArguments().getString(Router.EXTRA_COURSE_ID);
+        courseApi.getEnrolledCourses().enqueue(new CourseAPI.GetCourseByIdCallback(getActivity(), courseId) {
+            @Override
+            protected void onResponse(@NonNull final EnrolledCoursesResponse course) {
+                if (getActivity() != null && getActivity().getIntent() != null) {
+                    final Bundle args = new Bundle();
+                    args.putSerializable(Router.EXTRA_COURSE_DATA, course);
+                    setArguments(args);
+                    getFragmentManager().beginTransaction()
+                            .detach(CourseTabsDashboardFragment.this)
+                            .attach(CourseTabsDashboardFragment.this).commit();
+                }
+            }
+
+            @Override
+            protected void onFailure(@NonNull final Throwable error) {
+                Toast.makeText(getActivity(), R.string.cannot_show_dashboard, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
