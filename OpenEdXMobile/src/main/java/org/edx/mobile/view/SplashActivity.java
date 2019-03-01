@@ -6,7 +6,7 @@ import android.os.Bundle;
 
 import org.edx.mobile.base.MainApplication;
 import org.edx.mobile.core.IEdxEnvironment;
-import org.edx.mobile.deeplink.DeeplinkManager;
+import org.edx.mobile.deeplink.DeepLinkManager;
 import org.edx.mobile.logger.Logger;
 import org.edx.mobile.util.Config;
 import org.edx.mobile.util.NetworkUtil;
@@ -58,9 +58,9 @@ public class SplashActivity extends Activity {
                 if (error == null) {
                     // params are the deep linked params associated with the link that the user
                     // clicked -> was re-directed to this app params will be empty if no data found
-                    if (referringParams.optBoolean(DeeplinkManager.KEY_CLICKED_BRANCH_LINK)) {
+                    if (referringParams.optBoolean(DeepLinkManager.KEY_CLICKED_BRANCH_LINK)) {
                         try {
-                            DeeplinkManager.parseAndReact(SplashActivity.this, referringParams);
+                            DeepLinkManager.parseAndReact(SplashActivity.this, referringParams);
                         } catch (JSONException e) {
                             logger.error(e, true);
                         }

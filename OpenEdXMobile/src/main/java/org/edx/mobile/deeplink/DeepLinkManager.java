@@ -9,14 +9,14 @@ import org.edx.mobile.view.Router;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class DeeplinkManager {
-    protected static final Logger logger = new Logger(DeeplinkManager.class);
+public class DeepLinkManager {
+    protected static final Logger logger = new Logger(DeepLinkManager.class);
     public static final String KEY_CLICKED_BRANCH_LINK = "+clicked_branch_link";
     private static final String KEY_SCREEN_NAME = "screen_name";
     private static final String KEY_COURSE_ID = "course_id";
 
     public static void parseAndReact(@NonNull Activity activity, @NonNull JSONObject paramsJson) throws JSONException {
-        logger.debug("Deeplink received. JSON Details:\n" + paramsJson);
+        logger.debug("DeepLink received. JSON Details:\n" + paramsJson);
         final Router router = new Router();
         final boolean isLoggedIn = new LoginPrefs(activity).getUsername() != null;
         if (!isLoggedIn) {
