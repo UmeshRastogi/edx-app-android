@@ -9,6 +9,9 @@ import org.edx.mobile.view.Router;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Utility class to handle the navigation within the app through deep links.
+ */
 public class DeepLinkManager {
     protected static final Logger logger = new Logger(DeepLinkManager.class);
     public static final String KEY_CLICKED_BRANCH_LINK = "+clicked_branch_link";
@@ -24,11 +27,19 @@ public class DeepLinkManager {
         } else {
             final String screenName = paramsJson.getString(KEY_SCREEN_NAME);
             switch (screenName) {
-                case "course_dashboard":
+                case Screen.COURSE_DASHBOARD:
                     final String courseId = paramsJson.getString(KEY_COURSE_ID);
                     router.showCourseDashboardTabs(activity, null, courseId, false);
                     break;
             }
         }
+    }
+
+    /**
+     * A class that'll hold all the screen names that we'll be navigating within the app through
+     * deep links.
+     */
+    private static class Screen {
+        private static final String COURSE_DASHBOARD = "course_dashboard";
     }
 }
