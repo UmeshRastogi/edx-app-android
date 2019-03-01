@@ -69,12 +69,12 @@ public class MyCoursesListFragment extends OfflineSupportBaseFragment
         adapter = new MyCoursesAdapter(getActivity(), environment) {
             @Override
             public void onItemClicked(EnrolledCoursesResponse model) {
-                environment.getRouter().showCourseDashboardTabs(getActivity(), model, null, false);
+                environment.getRouter().showCourseDashboardTabs(getActivity(), model, false);
             }
 
             @Override
             public void onAnnouncementClicked(EnrolledCoursesResponse model) {
-                environment.getRouter().showCourseDashboardTabs(getActivity(), model, null, true);
+                environment.getRouter().showCourseDashboardTabs(getActivity(), model, true);
             }
         };
     }
