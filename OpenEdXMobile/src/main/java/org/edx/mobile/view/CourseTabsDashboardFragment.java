@@ -22,6 +22,7 @@ import com.joanzapata.iconify.fonts.FontAwesomeIcons;
 import org.edx.mobile.R;
 import org.edx.mobile.course.CourseAPI;
 import org.edx.mobile.databinding.FragmentDashboardErrorLayoutBinding;
+import org.edx.mobile.deeplink.ScreenDef;
 import org.edx.mobile.logger.Logger;
 import org.edx.mobile.model.FragmentItemModel;
 import org.edx.mobile.model.api.EnrolledCoursesResponse;
@@ -60,11 +61,14 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
     private boolean wasDownloadItemVisibleBeforeStopping = false;
 
     @NonNull
-    public static CourseTabsDashboardFragment newInstance(EnrolledCoursesResponse courseData, String courseId) {
+    public static CourseTabsDashboardFragment newInstance(@Nullable EnrolledCoursesResponse courseData,
+                                                          @Nullable String courseId,
+                                                          @ScreenDef @Nullable String screenName) {
         final CourseTabsDashboardFragment fragment = new CourseTabsDashboardFragment();
         final Bundle bundle = new Bundle();
         bundle.putSerializable(Router.EXTRA_COURSE_DATA, courseData);
         bundle.putSerializable(Router.EXTRA_COURSE_ID, courseId);
+        bundle.putSerializable(Router.EXTRA_SCREEN_NAME, screenName);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -121,8 +125,8 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
         courseApi.getEnrolledCourses().enqueue(new CourseAPI.GetCourseByIdCallback(getActivity(), courseId) {
             @Override
             protected void onResponse(@NonNull final EnrolledCoursesResponse course) {
-                if (getActivity() != null) {
-                    final Bundle args = new Bundle();
+                if (getActivity() != null && getArguments() != null) {
+                    final Bundle args = getArguments();
                     args.putSerializable(Router.EXTRA_COURSE_DATA, course);
                     setArguments(args);
                     getFragmentManager().beginTransaction()
@@ -133,14 +137,14 @@ public class CourseTabsDashboardFragment extends TabsBaseFragment {
 
             @Override
             protected void onFailure(@NonNull final Throwable error) {
-                if (getActivity() != null) {
-                    final Bundle args = new Bundle();
+                if (getActivity() != null && getArguments() != null) {
+                    final Bundle args = getArguments();
                     args.putBoolean(ARG_COURSE_NOT_FOUND, true);
                     setArguments(args);
                     getFragmentManager().beginTransaction()
                             .detach(CourseTabsDashboardFragment.this)
                             .attach(CourseTabsDashboardFragment.this).commit();
-                    logger.error(new Exception("Invalid Course ID provided via deeplink: " + courseId), true);
+                    logger.error(new Exception("Invalid Course ID provided via deep link: " + courseId), true);
                 }
             }
         });
