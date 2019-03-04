@@ -11,7 +11,7 @@ ATTEMPT=0
 TIMEOUT=300
 
 kill_all_emus() {
-    for emu_device in $(adb devices -l |grep 'device product:' |cut -d' ' -f1); do
+    for emu_device in $($ANDROID_HOME/platform-tools/adb devices -l |grep 'device product:' |cut -d' ' -f1); do
         echo "Killing emulator: $emu_device"
         adb -s $emu_device emu kill
     done
@@ -26,8 +26,8 @@ echo 'n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n test-android -f -k "
 echo 'loading emulator'
 $ANDROID_HOME/emulator/emulator -avd test-android -no-boot-anim -no-window -noaudio & 
 while true; do
-    BOOT_CURRENT_STATUS=`adb -e shell getprop init.svc.bootanim &`
-    SYS_BOOT_CURRENT_STATUS=`adb shell getprop sys.boot_completed &`    
+    BOOT_CURRENT_STATUS=`$ANDROID_HOME/platform-tools/adb -e shell getprop init.svc.bootanim &`
+    SYS_BOOT_CURRENT_STATUS=`$ANDROID_HOME/platform-tools/adb shell getprop sys.boot_completed &`    
     if [ "$BOOT_CURRENT_STATUS" = "$BOOT_FINISHED_STATUS" ] && [ "$SYS_BOOT_CURRENT_STATUS" = "$SYS_BOOT_FINISHED_STATUS" ]; 
     then 
         echo "emulator is ready"
