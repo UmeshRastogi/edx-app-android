@@ -34,12 +34,4 @@ public class DeepLinkManager {
             }
         }
     }
-
-    /**
-     * A class that'll hold all the screen names that we'll be navigating within the app through
-     * deep links.
-     */
-    private static class Screen {
-        private static final String COURSE_DASHBOARD = "course_dashboard";
-    }
 }
