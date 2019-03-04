@@ -20,7 +20,10 @@ kill_all_emus() {
 # Kill all existing emulators if any
 kill_all_emus
 
-kvm-ok
+lscpu
+
+egrep "svm|vmx" /proc/cpuinfo
+
 
 echo 'Creating emulator'
 echo 'n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n test-android -f -k "system-images;android-27;google_apis;x86"
